@@ -5,10 +5,9 @@ import 'screens/add_transaction_screen.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/intelligence_screen.dart';
 import 'screens/testing_screen.dart';
-import 'screens/settings_screen.dart';
 import 'services/app_initialization_service.dart';
 import 'services/settings_service.dart';
-import 'services/web_storage_service.dart'; // <-- Add this import
+import 'services/web_storage_service.dart';
 import 'l10n/app_localizations.dart'; // Generated localization
 
 void main() async {
@@ -131,20 +130,183 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Widget _buildAppBarActions() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Language Toggle
+        PopupMenuButton<String>(
+          onSelected: (language) {
+            final locale = Locale(language);
+            widget.onLanguageChanged(locale);
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'en',
+              child: Row(
+                children: [
+                  const Text('🇺🇸'),
+                  const SizedBox(width: 8),
+                  const Text('English'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'es',
+              child: Row(
+                children: [
+                  const Text('🇪🇸'),
+                  const SizedBox(width: 8),
+                  const Text('Español'),
+                ],
+              ),
+            ),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  Localizations.localeOf(context).languageCode == 'es' ? '🇪🇸' : '🇺🇸',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.language, size: 16),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        
+        // Currency Toggle
+        PopupMenuButton<String>(
+          onSelected: (currency) {
+            widget.onCurrencyChanged(currency);
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'COP',
+              child: Row(
+                children: [
+                  const Text('🇨🇴'),
+                  const SizedBox(width: 8),
+                  const Text('COP'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'USD',
+              child: Row(
+                children: [
+                  const Text('🇺🇸'),
+                  const SizedBox(width: 8),
+                  const Text('USD'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'EUR',
+              child: Row(
+                children: [
+                  const Text('🇪🇺'),
+                  const SizedBox(width: 8),
+                  const Text('EUR'),
+                ],
+              ),
+            ),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.currency,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.attach_money, size: 16),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        
+        // Theme Toggle
+        IconButton(
+          onPressed: () {
+            final currentTheme = Theme.of(context).brightness == Brightness.dark 
+                ? ThemeMode.light 
+                : ThemeMode.dark;
+            widget.onThemeChanged(currentTheme);
+          },
+          icon: Icon(
+            Theme.of(context).brightness == Brightness.dark 
+                ? Icons.light_mode 
+                : Icons.dark_mode,
+            color: Colors.white,
+          ),
+          tooltip: Theme.of(context).brightness == Brightness.dark 
+              ? 'Switch to Light Mode' 
+              : 'Switch to Dark Mode',
+        ),
+      ],
+    );
+  }
+
+  String _getScreenTitle() {
+    final isSpanish = Localizations.localeOf(context).languageCode == 'es';
+    switch (_selectedIndex) {
+      case 0:
+        return isSpanish ? '💰 Rastreador Inteligente de Gastos' : '💰 Smart Expense Tracker';
+      case 1:
+        return isSpanish ? 'Nueva Transacción' : 'New Transaction';
+      case 2:
+        return '📊 Analytics';
+      case 3:
+        return '🧠 AI Insights';
+      case 4:
+        return '🧪 Test Lab';
+      default:
+        return '💰 Smart Expense Tracker';
+    }
+  }
+
+  Color _getScreenColor() {
+    switch (_selectedIndex) {
+      case 0:
+        return Colors.purple[700]!;
+      case 1:
+        return Colors.blue[700]!;
+      case 2:
+        return Colors.orange[700]!;
+      case 3:
+        return Colors.indigo[700]!;
+      case 4:
+        return Colors.purple[700]!;
+      default:
+        return Colors.purple[700]!;
+    }
+  }
+
   List<Widget> get _screens => [
     HomeScreen(
       onNavigateToTab: _navigateToTab,
       currency: widget.currency,
     ),
     AddTransactionScreen(currency: widget.currency),
-    const AnalyticsScreen(),
+    AnalyticsScreen(currency: widget.currency),
     const IntelligenceScreen(),
     const TestingScreen(),
-    SettingsScreen(
-      onLanguageChanged: widget.onLanguageChanged,
-      onCurrencyChanged: widget.onCurrencyChanged,
-      onThemeChanged: widget.onThemeChanged,
-    ),
   ];
 
   @override
@@ -152,6 +314,12 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context)!; // Generated localization
     
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_getScreenTitle()),
+        backgroundColor: _getScreenColor(),
+        foregroundColor: Colors.white,
+        actions: [_buildAppBarActions()],
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -186,10 +354,6 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.science),
             label: l10n.testing,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: l10n.settings,
           ),
         ],
       ),

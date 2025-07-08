@@ -84,13 +84,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getLocalizedText('newTransaction')),
-        backgroundColor: _selectedType == TransactionType.expense 
-            ? Colors.red[700] 
-            : Colors.green[700],
-        foregroundColor: Colors.white,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -592,6 +585,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             _selectedCategoryId = null;
             _selectedDate = DateTime.now();
           });
+          
+          // Show success message and stay on the form
+          // The home screen will refresh when user navigates back
         }
       } catch (e) {
         if (mounted) {

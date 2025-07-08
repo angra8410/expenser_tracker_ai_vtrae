@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../services/web_storage_service.dart';
 import '../services/settings_service.dart';
 import '../models/transaction.dart';
@@ -14,19 +15,46 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   double _totalIncome = 0.0;
   double _totalExpenses = 0.0;
   int _transactionCount = 0;
   int _realTransactionCount = 0;
   List<Transaction> _recentTransactions = [];
   bool _isLoading = true;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _loadDashboardData();
+    _startAutoRefresh();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload data when the screen becomes visible
+    _loadDashboardData();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoRefresh() {
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted) {
+        _loadDashboardData();
+      }
+    });
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 
   // Temporary localization method
   String _getLocalizedText(String key) {
@@ -123,18 +151,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final netBalance = _totalIncome - _totalExpenses;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_getLocalizedText('appTitle')),
-        backgroundColor: Colors.purple[700],
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadDashboardData,
-            tooltip: _getLocalizedText('refreshData'),
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: _loadDashboardData,
         child: SingleChildScrollView(
@@ -181,14 +197,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Colombia 🇨🇴 | ${widget.currency} | ${DateTime.now().toString().substring(0, 10)}',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 12,
+                                      const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Colombia 🇨🇴 | ${widget.currency} | ${DateTime.now().toString().substring(0, 10)}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
+                      IconButton(
+                        onPressed: _loadDashboardData,
+                        icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+                        tooltip: _getLocalizedText('refreshData'),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
                   ],
                 ),
               ),
