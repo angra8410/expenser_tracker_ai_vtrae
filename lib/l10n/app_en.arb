@@ -1,0 +1,120 @@
+{
+  "@@locale": "en",
+  "appTitle": "Smart AI Expense Tracker",
+  "home": "Home",
+  "add": "Add",
+  "analytics": "Analytics",
+  "aiInsights": "AI Insights",
+  "testing": "Testing",
+  "settings": "Settings",
+  
+  "welcomeBack": "👋 Welcome back, {username}!",
+  "@welcomeBack": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "smartFinancialIntelligence": "Smart Financial Intelligence at your fingertips",
+  "totalIncome": "Total Income",
+  "totalExpenses": "Total Expenses",
+  "netBalance": "Net Balance",
+  "transactions": "Transactions",
+  "realTransactions": "real",
+  
+  "quickActions": "⚡ Quick Actions",
+  "addTransaction": "Add Transaction",
+  "addTransactionDesc": "Record new income or expense",
+  "viewAnalytics": "View Analytics",
+  "viewAnalyticsDesc": "See spending trends and insights",
+  "aiInsightsDesc": "Smart financial intelligence",
+  "testLab": "Test Lab",
+  "testLabDesc": "Generate test data for AI",
+  
+  "recentTransactions": "📊 Recent Transactions",
+  "viewAll": "View All",
+  "noTransactionsYet": "No transactions yet",
+  "addFirstTransaction": "Add your first transaction or generate test data",
+  "testData": "Test Data",
+  
+  "smartAIIntelligence": "🧠 Smart AI Intelligence",
+  "getIntelligentInsights": "Get intelligent insights into your spending patterns",
+  "weekendAnalysis": "• Weekend vs weekday analysis",
+  "categoryTrends": "• Category spending trends",
+  "recurringDetection": "• Recurring transaction detection",
+  "anomalyAlerts": "• Anomaly alerts and predictions",
+  "exploreAIInsights": "Explore AI Insights",
+  
+  "newTransaction": "New Transaction",
+  "addIncomeExpense": "Add income or expense to track with Smart AI",
+  "transactionType": "Transaction Type",
+  "expense": "Expense",
+  "income": "Income",
+  "amount": "Amount",
+  "description": "Description",
+  "whatWasThisFor": "What was this transaction for?",
+  "category": "Category",
+  "selectCategory": "Select a category",
+  "date": "Date",
+  "pleaseEnterAmount": "Please enter an amount",
+  "pleaseEnterValidAmount": "Please enter a valid amount",
+  "pleaseEnterDescription": "Please enter a description",
+  "pleaseSelectCategory": "Please select a category",
+  "saving": "Saving...",
+  "addExpense": "Add Expense",
+  "addIncome": "Add Income",
+  
+  "expenseAdded": "Expense of {amount} added!",
+  "@expenseAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "incomeAdded": "Income of {amount} added!",
+  "@incomeAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "language": "Language",
+  "currency": "Currency",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "spanish": "Spanish",
+  "english": "English",
+  "usDollar": "US Dollar",
+  "colombianPeso": "Colombian Peso",
+  
+  "appearance": "Appearance",
+  "localization": "Localization",
+  "chooseLanguage": "Choose your language",
+  "chooseCurrency": "Choose your currency",
+  "chooseTheme": "Choose your theme",
+  
+  "refreshData": "Refresh Data",
+  "loadingCategories": "Loading categories...",
+  "readyTransactions": "Ready! {count} categories loaded",
+  "@readyTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "coffee": "Coffee",
+  "lunch": "Lunch",
+  "gas": "Gas", 
+  "salary": "Salary",
+  "grocery": "Grocery",
+  "movie": "Movie"
+}
