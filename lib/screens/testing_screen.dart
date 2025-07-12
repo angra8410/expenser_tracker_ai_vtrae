@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../services/web_storage_service.dart';
-import '../utils/quick_test.dart';
+import '../services/export_service.dart';
+import '../widgets/edit_transaction_dialog.dart';
 
 class TestingScreen extends StatefulWidget {
   const TestingScreen({Key? key}) : super(key: key);
@@ -21,95 +22,72 @@ class _TestingScreenState extends State<TestingScreen> with AutomaticKeepAliveCl
 
   void _loadTransactions() {
     setState(() {
-      _transactionsFuture = WebStorageService.getTransactions();
+      _transactionsFuture = WebStorageService.getTransactions(includeTestData: false);
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Reload when coming back to this tab
-    _loadTransactions();
+    // Note: Removed automatic reload to prevent duplications
+    // Use the refresh button to manually reload if needed
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Needed for AutomaticKeepAliveClientMixin
     return Scaffold(
-      body: Column(
-        children: [
-          // Debug Controls
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              border: Border(bottom: BorderSide(color: Colors.blue[200]!)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '🔧 Debug Controls',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
+      appBar: AppBar(
+        title: const Text('Transactions'),
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.file_download),
+            tooltip: 'Export Transactions',
+            onSelected: _handleExport,
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'json',
+                child: Row(
                   children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          await QuickTest.testTransactionStorage();
-                          _loadTransactions();
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('🧪 Test completed! Check console for details.'),
-                                backgroundColor: Colors.blue,
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.science),
-                        label: const Text('Test Storage'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[600],
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          await QuickTest.clearAllData();
-                          _loadTransactions();
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('🧹 All data cleared!'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.clear_all),
-                        label: const Text('Clear All'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[600],
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
+                    Icon(Icons.code, size: 18),
+                    SizedBox(width: 8),
+                    Text('Export as JSON'),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const PopupMenuItem(
+                value: 'csv',
+                child: Row(
+                  children: [
+                    Icon(Icons.table_chart, size: 18),
+                    SizedBox(width: 8),
+                    Text('Export as CSV'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'excel',
+                child: Row(
+                  children: [
+                    Icon(Icons.grid_on, size: 18),
+                    SizedBox(width: 8),
+                    Text('Export as Excel'),
+                  ],
+                ),
+              ),
+            ],
           ),
-          
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Transactions',
+            onPressed: _loadTransactions,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
           // Transactions List
           Expanded(
             child: FutureBuilder<List<Transaction>>(
@@ -145,7 +123,6 @@ class _TestingScreenState extends State<TestingScreen> with AutomaticKeepAliveCl
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
-                    final isTest = tx.id.startsWith('test');
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                       child: ListTile(
@@ -153,46 +130,38 @@ class _TestingScreenState extends State<TestingScreen> with AutomaticKeepAliveCl
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: isTest ? Colors.orange[100] : (tx.type == TransactionType.income ? Colors.green[100] : Colors.red[100]),
+                            color: tx.type == TransactionType.income ? Colors.green[100] : Colors.red[100],
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Icon(
-                            isTest ? Icons.science : (tx.type == TransactionType.income ? Icons.add_circle : Icons.remove_circle),
-                            color: isTest ? Colors.orange[600] : (tx.type == TransactionType.income ? Colors.green[600] : Colors.red[600]),
+                            tx.type == TransactionType.income ? Icons.add_circle : Icons.remove_circle,
+                            color: tx.type == TransactionType.income ? Colors.green[600] : Colors.red[600],
                             size: 20,
                           ),
                         ),
-                        title: Row(
-                          children: [
-                            Expanded(child: Text(tx.description)),
-                            if (isTest)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange[100],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'TEST',
-                                  style: TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                        title: Text(tx.description),
                         subtitle: Text(
                           '${tx.categoryId.isNotEmpty ? tx.categoryId : "No Category"} • ${_formatDate(tx.date)}',
                         ),
-                        trailing: Text(
-                          '${tx.type == TransactionType.income ? "+" : "-"}\$${tx.amount.abs().toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: tx.type == TransactionType.income ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${tx.type == TransactionType.income ? "+" : "-"}\$${tx.amount.abs().toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: tx.type == TransactionType.income ? Colors.green : Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.edit,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ],
                         ),
+                        onTap: () => _editTransaction(tx),
                       ),
                     );
                   },
@@ -207,6 +176,89 @@ class _TestingScreenState extends State<TestingScreen> with AutomaticKeepAliveCl
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2,"0")}-${date.day.toString().padLeft(2,"0")}';
+  }
+
+  Future<void> _editTransaction(Transaction transaction) async {
+    await showDialog(
+      context: context,
+      builder: (context) => EditTransactionDialog(
+        transaction: transaction,
+        onTransactionUpdated: (updatedTransaction) {
+          _loadTransactions();
+        },
+        onTransactionDeleted: () {
+          _loadTransactions();
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleExport(String format) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Exporting transactions...'),
+            ],
+          ),
+        ),
+      );
+
+      // Perform export based on format
+      switch (format) {
+        case 'json':
+          await ExportService.exportToJson();
+          break;
+        case 'csv':
+          await ExportService.exportToCsv();
+          break;
+        case 'excel':
+          await ExportService.exportToExcel();
+          break;
+      }
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transactions exported as ${format.toUpperCase()} successfully!'),
+            backgroundColor: Colors.green,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override

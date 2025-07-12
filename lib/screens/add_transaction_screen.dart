@@ -4,6 +4,7 @@ import '../models/category.dart';
 import '../services/web_storage_service.dart';
 import '../services/app_initialization_service.dart';
 import '../services/settings_service.dart';
+import '../services/transactions_service.dart';
 import 'package:uuid/uuid.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -282,7 +283,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: widget.currency == 'COP' ? '1.500' : '1.50',
-                      prefixText: SettingsService.getCurrencySymbol(widget.currency) + ' ',
+                      prefixText: '${SettingsService.getCurrencySymbol(widget.currency)} ',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -561,7 +562,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           accountId: 'personal',
         );
 
+        // Save transaction to both storage services for redundancy and persistence
         await WebStorageService.addTransaction(transaction);
+        await TransactionsService.addTransaction(transaction);
 
         if (mounted) {
           final isSpanish = Localizations.localeOf(context).languageCode == 'es';

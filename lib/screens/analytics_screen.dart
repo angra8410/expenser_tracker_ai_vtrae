@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/web_storage_service.dart';
 import '../services/settings_service.dart';
+import '../services/transactions_service.dart';
 import '../models/transaction.dart';
 import '../models/category.dart';
 import '../services/app_initialization_service.dart';
@@ -32,11 +33,29 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with AutomaticKeepAli
     });
 
     try {
-      final transactions = await WebStorageService.getTransactions();
+      // Load transactions from both storage services (excluding test data)
+      final webTransactions = await WebStorageService.getTransactions(includeTestData: false);
+      final localTransactions = await TransactionsService.getTransactions(includeTestData: false);
       final categories = await AppInitializationService.getCategories();
       
+      // Merge transactions from both sources, avoiding duplicates by ID
+      final Map<String, Transaction> transactionMap = {};
+      
+      // Add all web transactions to the map
+      for (final tx in webTransactions) {
+        transactionMap[tx.id] = tx;
+      }
+      
+      // Add all local transactions to the map (will overwrite duplicates)
+      for (final tx in localTransactions) {
+        transactionMap[tx.id] = tx;
+      }
+      
+      // Convert map back to list
+      final List<Transaction> allTransactions = transactionMap.values.toList();
+      
       setState(() {
-        _transactions = transactions;
+        _transactions = allTransactions;
         _categories = categories;
       });
     } catch (e) {
@@ -516,7 +535,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with AutomaticKeepAli
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Text('Income'),
+                      const Text('Income'),
                     ],
                   ),
                   Row(
@@ -530,7 +549,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> with AutomaticKeepAli
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Text('Expenses'),
+                      const Text('Expenses'),
                     ],
                   ),
                 ],
