@@ -1,17 +1,29 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'web_storage_base.dart';
 
 class WebStorageService {
   static WebStorageService? _instance;
   late SharedPreferences _prefs;
+  static BuildContext? _context;
 
   WebStorageService._();
 
-  static Future<WebStorageService> getInstance() async {
+  static Future<void> initialize() async {
     if (_instance == null) {
       _instance = WebStorageService._();
       await _instance!._init();
+    }
+  }
+
+  static void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  static Future<WebStorageService> getInstance() async {
+    if (_instance == null) {
+      await initialize();
     }
     return _instance!;
   }
@@ -51,16 +63,12 @@ class WebStorageService {
       }).toList();
 
       final jsonStr = jsonEncode(allData);
-      // ignore: avoid_web_libraries_in_flutter
-      import 'web_storage_base.dart' show WebStorageBase;
       WebStorageBase.setItem('shared_preferences_backup', jsonStr);
     }
   }
 
   Future<void> _restoreFromLocalStorageIfNeeded() async {
     if (kIsWeb) {
-      // ignore: avoid_web_libraries_in_flutter
-      import 'web_storage_base.dart' show WebStorageBase;
       final backupStr = WebStorageBase.getItem('shared_preferences_backup');
       if (backupStr != null) {
         try {
@@ -91,8 +99,6 @@ class WebStorageService {
   Future<void> clear() async {
     await _prefs.clear();
     if (kIsWeb) {
-      // ignore: avoid_web_libraries_in_flutter
-      import 'web_storage_base.dart' show WebStorageBase;
       WebStorageBase.setItem('shared_preferences_backup', '[]');
     }
   }

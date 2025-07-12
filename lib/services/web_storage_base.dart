@@ -1,12 +1,18 @@
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html' show window;
+import 'dart:html' if (dart.library.io) 'web_storage_stub.dart' show window;
+import 'package:flutter/foundation.dart';
 
 class WebStorageBase {
   static void setItem(String key, String value) {
-    window.localStorage[key] = value;
+    if (kIsWeb && window != null) {
+      window.localStorage[key] = value;
+    }
   }
 
   static String? getItem(String key) {
-    return window.localStorage[key];
+    if (kIsWeb && window != null) {
+      return window.localStorage[key];
+    }
+    return null;
   }
 }
