@@ -22,7 +22,7 @@ jobs:
         run: flutter pub get
       
       - name: Build web
-        run: flutter build web --base-href /expense_tracker_smart_ai_vtrae/
+        run: flutter build web --base-href /expense_tracker_smart_ai/
       
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
