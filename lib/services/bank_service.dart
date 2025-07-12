@@ -3,7 +3,7 @@ import 'web_storage_service.dart';
 import 'package:uuid/uuid.dart';
 
 class BankService {
-  static final _uuid = Uuid();
+  static const _uuid = Uuid();
   static const String _storageKey = 'banks';
 
   static Future<List<Bank>> getBanks() async {

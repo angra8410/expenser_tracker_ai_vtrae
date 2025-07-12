@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:html' as html;
 import '../models/transaction.dart';
-import '../models/category.dart';
 import '../services/web_storage_service.dart';
 
 class ExportService {

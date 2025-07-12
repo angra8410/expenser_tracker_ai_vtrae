@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
 class ImportService {
-  static final _uuid = Uuid();
+  static const _uuid = Uuid();
 
   static Future<List<Transaction>> importFromCsv(String csvContent, String bankId) async {
     try {
